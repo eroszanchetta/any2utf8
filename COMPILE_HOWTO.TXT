@@ -1,0 +1,4 @@
+In order to compile the two different versions (GUI or console), choose the
+correct Main class in NetBeans:
+
+Project Properties -> Run -> Main Class
