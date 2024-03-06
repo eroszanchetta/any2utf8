@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  */
 public class Converter {
     
-    private final ArrayList<WarningCode> warning = new ArrayList<WarningCode>();
+    private final ArrayList<WarningCode> warning = new ArrayList<>();
     
     private String log;
     private String errorLog;
