@@ -28,7 +28,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="copyrightrLabel" alignment="1" max="32767" attributes="0"/>
                   <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
-                  <Component id="jLabel3" alignment="0" pref="388" max="32767" attributes="1"/>
+                  <Component id="jLabel3" alignment="0" pref="425" max="32767" attributes="1"/>
                   <Component id="platformInfoLabel" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="urlLabel" min="-2" max="-2" attributes="0"/>
@@ -55,7 +55,7 @@
               <Component id="copyrightrLabel" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="platformInfoLabel" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="37" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -72,6 +72,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel3">
       <Properties>
+        <Property name="horizontalAlignment" type="int" value="0"/>
         <Property name="text" type="java.lang.String" value="&lt;html&gt;An easy-to-use tool to convert the encoding of any text file to UTF8&lt;/html&gt;"/>
       </Properties>
     </Component>

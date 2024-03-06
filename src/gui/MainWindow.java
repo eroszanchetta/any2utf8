@@ -17,6 +17,7 @@
 
 package gui;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import core.About;
 import core.Converter;
 import core.ErrorCode;
@@ -65,23 +66,18 @@ public class MainWindow extends javax.swing.JFrame {
     
     /** Creates new form MainWindow */
     public MainWindow() {
+
+        FlatLightLaf.setup();        
         
-        String defaultLookAndFeel = UIManager.getSystemLookAndFeelClassName();
-        // String defaultLookAndFeel = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-        
+
+            //         String defaultLookAndFeel = UIManager.getSystemLookAndFeelClassName();
+            // String defaultLookAndFeel = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+            
+//        String defaultLookAndFeel = flatLightLaf.getName();
+
         try {
-            UIManager.setLookAndFeel(defaultLookAndFeel);            
-        }
-        catch (ClassNotFoundException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (InstantiationException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (IllegalAccessException ex) {
-            Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (UnsupportedLookAndFeelException ex) {
+            UIManager.setLookAndFeel(new FlatLightLaf());        
+        } catch (UnsupportedLookAndFeelException ex) {
             Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
         }
                 
@@ -480,7 +476,8 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_convertButtonActionPerformed
 
     private void onlineHelpMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_onlineHelpMenuItemActionPerformed
-        BareBonesBrowserLaunch.openURL(About.getHelpUrl());
+        Browser.browse(About.getHelpUrl());
+//        BareBonesBrowserLaunch.openURL(About.getHelpUrl());
     }//GEN-LAST:event_onlineHelpMenuItemActionPerformed
 
     private void inputTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputTextFieldActionPerformed

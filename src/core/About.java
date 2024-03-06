@@ -23,14 +23,14 @@ package core;
  */
 public class About {
 
-    private static final Double   VERSION           = 0.3;
+    private static final Double   VERSION           = 0.4;
     private static final String   AUTHOR            = "Eros Zanchetta";
     private static final String   PROGRAM_NAME      = "any2utf8";
     private static final String   PROGRAM_NAME_CLI  = "any2utf8-cli";
     private static final String   PROGRAM_URL        = "http://bootcat.dipintra.it/redirects/redirect.php?targetPage=any2utf8_home";
     private static final String   HELP_URL           = "http://bootcat.dipintra.it/redirects/redirect.php?targetPage=any2utf8_manual";
     private static final int      COPYRIGHT_FIRST    = 2011;
-    private static final int      COPYRIGHT_LATEST   = 2020;
+    private static final int      COPYRIGHT_LATEST   = 2024;
 
     public enum Platform {
         LINUX,
