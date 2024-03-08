@@ -64,10 +64,6 @@ public class ConversionDone extends javax.swing.JDialog {
         this.pack();
         this.setVisible(true);
     }
-
-    private String htmlize(String s) {
-        return s.replace(System.getProperty("line.separator"), "<br />");
-    }
     
     /** This method is called from within the constructor to
      * initialize the form.
@@ -83,14 +79,15 @@ public class ConversionDone extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         detailsTextArea = new javax.swing.JTextArea();
         detailsLabel = new javax.swing.JLabel();
+        okButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Conversion results");
 
         messageLabel.setText("messageLabel");
 
-        detailsTextArea.setColumns(20);
         detailsTextArea.setEditable(false);
+        detailsTextArea.setColumns(20);
         detailsTextArea.setLineWrap(true);
         detailsTextArea.setRows(5);
         jScrollPane1.setViewportView(detailsTextArea);
@@ -103,21 +100,35 @@ public class ConversionDone extends javax.swing.JDialog {
             }
         });
 
+        okButton.setText("OK");
+        okButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                okButtonActionPerformed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout detailsPanelLayout = new org.jdesktop.layout.GroupLayout(detailsPanel);
         detailsPanel.setLayout(detailsPanelLayout);
         detailsPanelLayout.setHorizontalGroup(
             detailsPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE)
             .add(detailsPanelLayout.createSequentialGroup()
-                .add(detailsLabel)
-                .addContainerGap())
+                .add(detailsPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(detailsLabel)
+                    .add(detailsPanelLayout.createSequentialGroup()
+                        .add(168, 168, 168)
+                        .add(okButton)))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         detailsPanelLayout.setVerticalGroup(
             detailsPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(detailsPanelLayout.createSequentialGroup()
                 .add(detailsLabel)
-                .add(4, 4, 4)
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 125, Short.MAX_VALUE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 124, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                .add(okButton)
+                .addContainerGap())
         );
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
@@ -137,8 +148,7 @@ public class ConversionDone extends javax.swing.JDialog {
                 .addContainerGap()
                 .add(messageLabel)
                 .add(18, 18, 18)
-                .add(detailsPanel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .add(detailsPanel, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -148,11 +158,16 @@ public class ConversionDone extends javax.swing.JDialog {
 
     }//GEN-LAST:event_detailsLabelMouseClicked
 
+    private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_okButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel detailsLabel;
     private javax.swing.JPanel detailsPanel;
     private javax.swing.JTextArea detailsTextArea;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel messageLabel;
+    private javax.swing.JButton okButton;
     // End of variables declaration//GEN-END:variables
 }

@@ -165,6 +165,9 @@
   </Layout>
   <SubComponents>
     <Component class="javax.swing.JTextField" name="inputTextField">
+      <Properties>
+        <Property name="dragEnabled" type="boolean" value="true"/>
+      </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="inputTextFieldActionPerformed"/>
         <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="inputTextFieldKeyTyped"/>

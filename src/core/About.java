@@ -23,7 +23,7 @@ package core;
  */
 public class About {
 
-    private static final Double   VERSION           = 1.0;
+    private static final Double   VERSION           = 1.1;
     private static final String   AUTHOR            = "Eros Zanchetta";
     private static final String   PROGRAM_NAME      = "any2utf8";
     private static final String   PROGRAM_NAME_CLI  = "any2utf8-cli";

@@ -21,14 +21,24 @@ import com.formdev.flatlaf.FlatLightLaf;
 import core.About;
 import core.Converter;
 import core.ErrorCode;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.JTextField;
+import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -63,6 +73,8 @@ public class MainWindow extends javax.swing.JFrame {
     private String  outputFileLabelStringFolder = "<html>The folder where the converted files will be put <span style='color: red; font-weight: bold;'>(folder must be empty)</span>:</html>";
     private String  convertButtonLabel1         = "Convert";
     private String  convertButtonLabel2         = "Converting...";
+    private File    lastSelectedInputDir;
+    private File    lastSelectedOutputDir;
     
     /** Creates new form MainWindow */
     public MainWindow() {
@@ -97,6 +109,22 @@ public class MainWindow extends javax.swing.JFrame {
         verifyIfConversionIsPossible();
     }
 
+    public File getLastSelectedInputDir() {
+        return lastSelectedInputDir;
+    }
+
+    public void setLastSelectedInputDir(File lastSelectedInputDir) {
+        this.lastSelectedInputDir = lastSelectedInputDir;
+    }
+
+    public File getLastSelectedOutputDir() {
+        return lastSelectedOutputDir;
+    }
+
+    public void setLastSelectedOutputDir(File lastSelectedOutputDir) {
+        this.lastSelectedOutputDir = lastSelectedOutputDir;
+    }
+    
     private void resetInputParams() {
         inputTextField.setText("");
         verifyIfConversionIsPossible();
@@ -109,26 +137,125 @@ public class MainWindow extends javax.swing.JFrame {
         
     private void postInit() {
         conversionType  = ConversionType.FILE;
-        
+            
         inputFileLabel.setText(inputFileLabelStringFile);
         outputFileLabel.setText(outputFileLabelStringFile);
         convertButton.setText(convertButtonLabel1);
         
+        inputTextField.setTransferHandler(new FileTransferHandler());
+        inputTextField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                // Triggered when text is inserted into the document
+                textFieldChanged();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                // Triggered when text is removed from the document
+                textFieldChanged();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                // Called when the attributes of a document event changes, not relevant for plain text
+            }
+
+            // Function to be triggered when the text field content changes
+            private void textFieldChanged() {
+                String newText = inputTextField.getText().trim();
+                
+                File inputFile = new File(newText);
+                if (inputFile.exists()) {
+                    inputSelected(inputFile);
+                }
+            }
+        });
+        
+        outputTextField.setTransferHandler(new FileTransferHandler());
+        outputTextField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                // Triggered when text is inserted into the document
+                textFieldChanged();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                // Triggered when text is removed from the document
+                textFieldChanged();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                // Called when the attributes of a document event changes, not relevant for plain text
+            }
+
+            // Function to be triggered when the text field content changes
+            private void textFieldChanged() {
+                String newText = outputTextField.getText().trim();
+                
+                File outputFile = new File(newText);
+                
+                if (outputFile.exists()) {
+                    outputSelected(outputFile);
+                }
+            }
+        });
+        
         this.setJMenuBar(mainMenuBar);
     }
     
-    private File findSuitableName(File file) {
+    static class FileTransferHandler extends TransferHandler {
+        @Override
+        public boolean canImport(TransferSupport support) {
+            return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+        }
+
+        @Override
+        public boolean importData(TransferSupport support) {
+            if (!canImport(support))
+                return false;
+
+            Transferable transferable = support.getTransferable();
+            try {
+                List<File> files = (List<File>) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                if (!files.isEmpty()) {
+                    File file = files.get(0); // We assume only one file is dragged
+                    ((JTextField) support.getComponent()).setText(file.getAbsolutePath());
+                    return true;
+                }
+            } catch (UnsupportedFlavorException | IOException e) {
+                e.printStackTrace();
+            }
+
+            return false;
+        }
+    }    
+    
+    public File findSuitableName(File file) {
         File path = new File(file.getParent());
         
-        String prefix = "utf8_";
-        String tempPrefix = prefix;
-        
-        int n = 0;
-        while (new File(path + File.separator + tempPrefix + file.getName()).isFile()) {
-            tempPrefix = prefix + ++n + "_";
+        String fileName = file.getName();
+        String fileExtension = "";
+
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex != -1) {
+            fileExtension = fileName.substring(dotIndex);
+            fileName = fileName.substring(0, dotIndex);
         }
-                
-        return new File(path + File.separator + tempPrefix + file.getName());
+
+        String destFileName = fileName + "_utf8" + fileExtension;
+        File copyFile = new File(file.getParent(), destFileName);
+
+        int count = 1;
+        while (copyFile.exists()) {
+            destFileName = fileName + "_utf8(" + count + ")" + fileExtension;
+            copyFile = new File(file.getParent(), destFileName);
+            count++;
+        }
+
+        return new File(path + File.separator + destFileName);
     }
     
     private void verifyIfConversionIsPossible() {
@@ -143,6 +270,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void convert() {
         convertButton.setText(convertButtonLabel2);
         convertButton.setEnabled(false);
+        this.setEnabled(false);
         
         File inFile = new File(inputTextField.getText());
         File outFile = new File(outputTextField.getText());
@@ -171,8 +299,93 @@ public class MainWindow extends javax.swing.JFrame {
         
         ConversionDone conversionDone = new ConversionDone(this, true, ok, warning, details);
         
+        // if conversion completed without errors
+        if (ok) {
+            // reset the TextFields
+            inputTextField.setText("");
+            outputTextField.setText("");
+            
+
+            // open a file manager
+            File targetDir;
+            if (outFile.isDirectory()) {
+                targetDir = outFile;
+            }
+            else {
+                targetDir = new File(outFile.getParent());
+            }
+
+            try {
+                Desktop.getDesktop().open(targetDir);
+            } catch (IOException ex) {
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }
+        
+        this.setEnabled(true);
         convertButton.setText(convertButtonLabel1);
         convertButton.setEnabled(true);
+    }
+    
+    private void inputSelected(File inputFile) {
+                        
+        // propose a name for output file
+        if (inputFile.isFile()) {
+            outputTextField.setText(findSuitableName(inputFile).getPath());
+            setLastSelectedInputDir(inputFile.getParentFile());
+            setLastSelectedOutputDir(inputFile.getParentFile());
+        }
+        else {
+            setLastSelectedInputDir(inputFile);
+        }
+                
+        verifyIfConversionIsPossible();        
+    }
+    
+    private void outputSelected(File outputFile) {
+        // if converting a single file, try to assign the output filename the same name
+        // as the input file name
+        File inputFile = new File(inputTextField.getText());
+        if (inputFile.isFile()) {
+            outputFile = new File(outputFile.getPath() + File.separator + inputFile.getName());
+            setLastSelectedOutputDir(outputFile.getParentFile());
+        }
+        else {
+            setLastSelectedOutputDir(outputFile);
+        }
+
+        // if output file has the same path as the input file
+        // find a suitable name for it
+        if (inputFile.getPath().equals(outputFile.getPath())) {
+            outputFile = findSuitableName(outputFile);
+        }
+        
+//        if (outputFile != null) {
+//            outputTextField.setText(outputFile.getPath());
+//        }
+        
+        verifyIfConversionIsPossible();        
+    }
+    
+    private void setConversionTypeFile() {
+        if (conversionType.equals(ConversionType.FILE)) return;
+        
+        inputFileLabel.setText(inputFileLabelStringFile);
+        outputFileLabel.setText(outputFileLabelStringFile);
+        conversionType = ConversionType.FILE;
+        resetInputParams();
+        resetOutputParams();        
+    }
+    
+    private void setConversionTypeFolder() {
+        if (conversionType.equals(ConversionType.FOLDER)) return;
+        
+        inputFileLabel.setText(inputFileLabelStringFolder);
+        outputFileLabel.setText(outputFileLabelStringFolder);
+        conversionType = ConversionType.FOLDER;
+        resetInputParams();
+        resetOutputParams();        
     }
     
     /** This method is called from within the constructor to
@@ -207,6 +420,7 @@ public class MainWindow extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Any2UTF8");
 
+        inputTextField.setDragEnabled(true);
         inputTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 inputTextFieldActionPerformed(evt);
@@ -382,30 +596,20 @@ public class MainWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void convertFileRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_convertFileRadioButtonActionPerformed
-        if (conversionType.equals(conversionType.FILE)) return;
-        
-        inputFileLabel.setText(inputFileLabelStringFile);
-        outputFileLabel.setText(outputFileLabelStringFile);
-        conversionType = ConversionType.FILE;
-        resetInputParams();
-        resetOutputParams();
+        setConversionTypeFile();
     }//GEN-LAST:event_convertFileRadioButtonActionPerformed
 
     private void convertFolderRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_convertFolderRadioButtonActionPerformed
-        if (conversionType.equals(conversionType.FOLDER)) return;
-        
-        inputFileLabel.setText(inputFileLabelStringFolder);
-        outputFileLabel.setText(outputFileLabelStringFolder);
-        conversionType = ConversionType.FOLDER;
-        resetInputParams();
-        resetOutputParams();
+        setConversionTypeFolder();
     }//GEN-LAST:event_convertFolderRadioButtonActionPerformed
 
     private void outputSelectorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_outputSelectorButtonActionPerformed
                 
         JFileChooser fc = new JFileChooser();
 
-	fc.setMultiSelectionEnabled(false);
+        fc.setCurrentDirectory(getLastSelectedOutputDir());
+        
+    	fc.setMultiSelectionEnabled(false);
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         
         fc.setDialogTitle("Folder for converted files");
@@ -415,22 +619,7 @@ public class MainWindow extends javax.swing.JFrame {
                 
         if (outputFile == null) return;
         
-        // if converting a single file, try to assign the output filename the same name
-        // as the input file name
-        File inputFile = new File(inputTextField.getText());
-        if (inputFile.isFile())
-            outputFile = new File(outputFile.getPath() + File.separator + inputFile.getName());
-        
-        // if output file has the same path as the input file
-        // find a suitable name for it
-        if (inputFile.getPath().equals(outputFile.getPath()))
-            outputFile = findSuitableName(outputFile);
-        
-        if (outputFile != null) {
-            outputTextField.setText(outputFile.getPath());
-        }
-        
-        verifyIfConversionIsPossible();
+        outputSelected(outputFile);
     }//GEN-LAST:event_outputSelectorButtonActionPerformed
 
     private void inputSelectorButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputSelectorButtonActionPerformed
@@ -440,6 +629,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         JFileChooser fc = new JFileChooser();
         fc.setMultiSelectionEnabled(false);
+        fc.setCurrentDirectory(getLastSelectedInputDir());
         
         switch (conversionType) {
             default:
@@ -457,18 +647,13 @@ public class MainWindow extends javax.swing.JFrame {
                 break;
         }
 
-
         inputFile = fc.getSelectedFile();
-
+        
         if (inputFile == null) return;
         
         inputTextField.setText(inputFile.getPath());
         
-        // propose a name for output file
-        if (inputFile.isFile())
-            outputTextField.setText(findSuitableName(inputFile).getPath());
-        
-        verifyIfConversionIsPossible();
+        inputSelected(inputFile);
     }//GEN-LAST:event_inputSelectorButtonActionPerformed
 
     private void convertButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_convertButtonActionPerformed
@@ -481,7 +666,7 @@ public class MainWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_onlineHelpMenuItemActionPerformed
 
     private void inputTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputTextFieldActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_inputTextFieldActionPerformed
 
     private void inputTextFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inputTextFieldKeyTyped
